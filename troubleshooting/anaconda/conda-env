@@ -1,0 +1,159 @@
+# Conda 가상환경 생성 후 `conda activate`가 동작하지 않는 문제
+
+### 증상
+
+다음과 같은 상황이 발생할 수 있다.
+
+* `conda create` 명령은 오류 없이 실행된다.
+* 가상환경은 정상적으로 생성된다.
+* 하지만 `conda activate`를 실행하면 활성화되지 않거나 Conda 명령이 정상적으로 동작하지 않는다.
+
+---
+
+
+  
+### 원인
+
+PowerShell이 **Conda가 수정한 프로필 파일이 아닌 다른 프로필 파일을 읽고 있기 때문**이다.
+
+`conda init powershell`은 다음 파일에 초기화 코드를 추가한다.
+
+```text
+C:\Users\사용자명\Documents\WindowsPowerShell\profile.ps1
+```
+
+하지만 현재 PowerShell이 실제로 사용하는 프로필은
+
+```text
+C:\Users\사용자명\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+```
+
+인 경우가 있다.
+
+즉,
+
+* Conda는 `profile.ps1`을 수정했고
+* PowerShell은 `Microsoft.PowerShell_profile.ps1`만 읽고 있으므로
+
+Conda 초기화 코드가 실행되지 않는 것이다.
+
+---
+
+
+  
+### 원리
+
+Windows PowerShell은 시작될 때 **프로필(Profile) 스크립트**를 읽어 사용자 설정을 적용한다.
+
+`conda init powershell`을 실행하면 이 프로필 파일에 Conda 초기화 코드(`conda initialize`)가 자동으로 추가된다.
+
+PowerShell이 시작될 때 이 코드가 실행되어야만 다음과 같은 명령을 사용할 수 있다.
+
+```powershell
+conda activate
+```
+
+하지만 PowerShell이 다른 프로필 파일을 읽고 있다면 Conda 초기화 코드가 실행되지 않아 `conda activate`가 정상적으로 동작하지 않는다.
+
+---
+
+
+
+### PowerShell 프로필 위치
+
+Windows PowerShell(기본)
+
+```text
+C:\Users\사용자명\Documents\WindowsPowerShell\profile.ps1
+```
+
+PowerShell 7(pwsh)
+
+```text
+C:\Users\사용자명\Documents\PowerShell\profile.ps1
+```
+
+버전에 따라 프로필 위치가 다르므로 혼동하기 쉽다.
+
+---
+
+
+
+### 현재 상황 확인
+
+현재 PowerShell이 사용하는 프로필을 확인한다.
+
+```powershell
+$PROFILE
+```
+
+Conda가 수정한 파일의 내용을 확인한다.
+
+```powershell
+Get-Content "C:\Users\사용자명\Documents\WindowsPowerShell\profile.ps1"
+```
+
+여기서 `conda initialize` 블록이 있는지 확인한다.
+
+---
+
+
+
+### 해결 방법 1 (권장)
+
+`profile.ps1`의 내용을 현재 PowerShell이 사용하는 프로필 파일로 복사한다.
+
+```powershell
+Get-Content "C:\Users\사용자명\Documents\WindowsPowerShell\profile.ps1" |
+Set-Content $PROFILE
+```
+
+복사가 끝난 후 PowerShell을 완전히 종료하고 다시 실행한다.
+
+---
+
+
+
+### 해결 방법 2
+
+현재 사용하는 프로필에서 `profile.ps1`을 불러오도록 설정한다.
+
+```powershell
+Add-Content $PROFILE '. "C:\Users\사용자명\Documents\WindowsPowerShell\profile.ps1"'
+```
+
+이 역시 PowerShell을 다시 실행해야 적용된다.
+
+---
+
+
+
+### 확인
+
+PowerShell을 새로 실행한 뒤 다음 명령으로 정상 동작하는지 확인한다.
+
+```powershell
+conda activate <가상환경 이름>
+```
+
+예시
+
+```powershell
+conda activate NewTest-nev
+```
+
+가상환경 이름이 `(NewTest-nev)`처럼 표시되면 정상적으로 활성화된 것이다.
+
+---
+
+
+
+### 정리
+
+| 항목      | 내용                                        |
+| ------- | ----------------------------------------- |
+| 원인      | Conda가 수정한 프로필과 PowerShell이 읽는 프로필이 서로 다름 |
+| 문제      | `conda initialize` 코드가 실행되지 않음            |
+| 해결 방법 1 | `profile.ps1` 내용을 `$PROFILE`에 복사          |
+| 해결 방법 2 | `$PROFILE`에서 `profile.ps1`을 불러오도록 설정      |
+| 적용 방법   | PowerShell을 완전히 종료한 뒤 다시 실행               |
