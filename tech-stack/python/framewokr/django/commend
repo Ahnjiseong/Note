@@ -1,8 +1,52 @@
 ### 명령어
 
 - python manage.py migrate
-설계도를 실제 DB에 적용합니다.
+  설계도를 실제 DB에 적용합니다.
+
 - python manage.py makemigrations
-이 명령은 **모델(models.py)의 변경 사항을 분석해서 SQL 설계도(Migration 파일)를 생성**합니다.
+  이 명령은 **모델(models.py)의 변경 사항을 분석해서 SQL 설계도(Migration 파일)를 생성**합니다.
+
 - python manage.py runserver
-개발용 서버 실행
+  개발용 서버 실행
+
+
+
+### 프로젝트 생성
+
+- 장고 프로젝트 생성: django-admin startproject mytestsite
+
+
+
+### 프로젝트 실행
+
+- python manage.py runserver
+  성공 시: Starting development server at http://127.0.0.1:8000/
+- Ctrl + C
+  성공 시: 서버 종료(터미널 창에서)
+- python manage.py check
+  Django 설정 오류 판별.
+  정상이면 System check identified no issues (0 silenced).
+
+
+
+#### 앱
+
+**실제 기능을 구현하는 앱 폴더**
+
+- **migrations 폴더** — 모델을 수정할 때 마다 자동으로 데이터베이스를 업데이트하는 것을 가능하게 해 줄 마이그레이션 파일들을 저장할 폴더
+- **__init__.py** — 장고/파이썬이 폴더를 파이썬 패키지로 인식하게 할 빈 파일입니다. 또한 프로젝트의 다른 부분에서 객체(object)를 사용할 수 있게 합니다.
+- templates 폴더 — 웹을 구성하는 뼈대를 담당. html 파일 보관
+- static 폴더 — css, js, 이미지 파일 등
+- 각 기능을 담당하는 폴더를 추가하는 방식으로 운영
+
+
+
+### 프로젝트
+
+**전체 기능을 관리하는 프로젝트 폴더(config)**
+
+- **__init__.py**는 빈 파일입니다. 이 파일은 파이썬에게 이 디렉토리를 하나의 파이썬 패키지로 다루도록 지시합니다.
+- **settings.py**는 웹사이트의 모든 설정을 포함하고 있습니다. 이 파일에는 우리가 만드는 모든 어플리케이션, 정적 파일의 위치, 데이터베이스 세부 설정 등을 등록합니다.
+- **urls.py**는 사이트의 URL과 뷰의 연결을 지정해줍니다. 여기에는 모든 URL 매핑 코드가 포함될 수 있지만, 특정한 어플리케이션에 매핑의 일부를 할당해주는 것이 일반적입니다.
+- **wsgi.py**는 당신의 장고 어플리케이션이 웹서버와 연결 및 소통하는 것을 돕습니다. 당신은 이것을 표준 형식(boilerplate)으로 다뤄도 무방합니다.
+- **asgi.py**는 Python 비동기 웹 앱과 서버가 서로 통신할 수 있는 표준으로, 동기 Python 앱을 위한 표준을 제공했던 WSGI의 비동기 후속으로 자리 잡았다. WSGI가 동기 앱용 표준을 제공했다면, ASGI는 비동기와 동기 앱 모두를 위한 표준을 제공하고, WSGI 호환 구현과 여러 서버 및 애플리케이션 프레임워크를 포함하고 있다.
