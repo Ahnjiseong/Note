@@ -1,0 +1,5 @@
+### 명령어
+
+- 서버 실행: net start postgresql-x64-17
+- 서버 종료: net stop postgresql-x64-17
+- 실행 확인: netstat -ano | findstr 5432
