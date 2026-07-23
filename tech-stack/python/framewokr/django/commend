@@ -1,0 +1,8 @@
+### 명령어
+
+- python manage.py migrate
+설계도를 실제 DB에 적용합니다.
+- python manage.py makemigrations
+이 명령은 **모델(models.py)의 변경 사항을 분석해서 SQL 설계도(Migration 파일)를 생성**합니다.
+- python manage.py runserver
+개발용 서버 실행
