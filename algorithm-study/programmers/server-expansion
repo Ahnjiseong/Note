@@ -1,0 +1,97 @@
+# 서버 증설
+
+## 문제
+  서버 증설 횟수
+
+### 핵심 아이디어
+  1. 서버[생성된 시점 인덱스, 생성된 서버 개수], 현재 서버 개수, 증설 필요 서버 개수
+  2. players 인덱스(시간대) 만큼 반복
+  3. 기간 만료된 서버 삭제(서버가 생성된 시점의 인덱스 + k < i)
+  4. 특정 시간대에 사람이 없는 경우 증설 필요 없으니 coutinue
+  5. players[index] / m(서버 당 최대 수용 가능인원) 확인해서 증설 필요한 서버 개수 구하기
+
+
+### 코드
+def solution(players, m, k):
+    answer = 0
+    serverCount = 0     # 현재 서버 개수
+    needServerCount = 0 # 증설 필요 서버 개수
+    serverNode = []   # 서버 노드 정보
+    
+    for i in range(len(players)):
+        
+        # 기간 만료 된 서버 종료
+        for j in range(len(serverNode)):
+            if serverNode[j][0] + k < i:
+                serverCount -= serverNode[j][1]
+                serverNode.pop(j)
+        
+        # 특정 시간대에 사람이 없는 경우 서버 증설 필요 없음
+        if players[i] == 0: continue
+        
+        # 증설 필요 서버 개수 계산
+        if players[i] % m != 0: needServerCount = (players[i] // m) + 1
+        else: needServerCount = players[i] // m
+        
+        # 서버 당 수용 가능인원이 초과하여 증설 필요한 경우
+        if serverCount < needServerCount:
+            serverNode.append([i, needServerCount - serverCount])
+            serverCount += serverNode[i][1]
+            
+    answer = serverCount
+    
+    return answer
+
+
+
+### 문제점
+  1. 필요한 서버 수 계산이 잘못됨
+    단순히 몫만 계산해야 함.
+    needServerCount = players[i] // m
+    
+  2. 서버 만료 조건이 잘못됨
+    만료시간 까지 포함해야 함.
+    serverNode[j][0] + k <= i
+    
+  3. 반복 중에 리스트에서 pop()하면 문제가 생김
+    리스트를 순회하면서 중간 요소를 삭제하면 뒤의 요소 인덱스가 앞으로 당겨짐.
+    
+  4. serverNode[i][1]은 잘못된 인덱스
+    하지만 serverNode의 인덱스와 현재 시간 i는 아무 관계가 없음 
+    예를 들어 현재 시간이 10인데 serverNode에 저장된 요소가 2개뿐이면 serverNode[10] 에 접근하게 되어 IndexError가 발생.
+    
+  5. answer = serverCount도 잘못됨
+    serverCount는 현재 운영 중인 서버 개수 따라서 서버를 추가할 때마다 answer에 누적해야 함.
+
+
+
+### 수정된 코드
+def solution(players, m, k):
+    answer = 0
+    server_count = 0
+    server_nodes = []
+
+    for i in range(len(players)):
+
+        # 운영 시간이 끝난 서버 제거
+        while server_nodes and server_nodes[0][0] + k <= i:
+            start_time, count = server_nodes.pop(0)
+            server_count -= count
+
+        # 현재 시간에 필요한 서버 수
+        need_server_count = players[i] // m
+
+        # 현재 서버가 부족한 경우
+        if server_count < need_server_count:
+            add_count = need_server_count - server_count
+
+            # 현재 시간에 add_count대 증설
+            server_nodes.append([i, add_count])
+
+            # 현재 운영 중인 서버 수 증가
+            server_count += add_count
+
+            # 전체 증설 횟수 누적
+            answer += add_count
+
+    return answer
