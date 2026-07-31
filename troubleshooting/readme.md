@@ -6,5 +6,5 @@
 
 ## troubleshooting
 
-- WSL REGDB_E_CLASSNOTREG 오류 해결
+- WSL 
 - Conda 가상환경 정리
