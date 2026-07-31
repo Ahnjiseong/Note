@@ -1,0 +1,10 @@
+# Development Notes
+
+개발하면서 발생했던 문제와 해결 과정을 정리한 저장소입니다.
+
+
+
+## troubleshooting
+
+- WSL REGDB_E_CLASSNOTREG 오류 해결
+- Conda 가상환경 정리
